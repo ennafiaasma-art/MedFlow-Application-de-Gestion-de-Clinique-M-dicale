@@ -1,4 +1,6 @@
 CREATE DATABASE medflow;
+
+
 USE medflow;
 
 CREATE TABLE role (
@@ -40,14 +42,23 @@ CREATE TABLE admin (
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
+CREATE TABLE disponibilite (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date_debut DATETIME NOT NULL,
+    date_fin DATETIME NOT NULL,
+    disponible BOOLEAN DEFAULT TRUE,
+    id_medcin INT NOT NULL,
+    FOREIGN KEY (id_medcin) REFERENCES doctor(id_doctor)
+);
+
 CREATE TABLE rendezvous (
     id INT AUTO_INCREMENT PRIMARY KEY,
     statut VARCHAR(50) DEFAULT 'en_attente',
     dateCreation DATETIME DEFAULT CURRENT_TIMESTAMP,
     patient_id INT NOT NULL,
-    doctor_id INT NOT NULL,
+    disponibilite_id INT NOT NULL,
     FOREIGN KEY (patient_id) REFERENCES patient(id_patient),
-    FOREIGN KEY (doctor_id) REFERENCES doctor(id_doctor)
+    FOREIGN KEY (disponibilite_id) REFERENCES disponibilite(id)
 );
 
 CREATE TABLE ordonnance (
@@ -57,7 +68,6 @@ CREATE TABLE ordonnance (
     rendezVous_id INT NOT NULL,
     FOREIGN KEY (rendezVous_id) REFERENCES rendezvous(id)
 );
-
 
 
 
@@ -88,8 +98,20 @@ VALUES (2, 1);
 INSERT INTO patient (user_id)
 VALUES (3);
 
-INSERT INTO rendezvous (statut, patient_id, doctor_id)
-VALUES ('confirmé', 1, 1);
+INSERT INTO disponibilite
+(date_debut, date_fin, disponible, id_medcin)
+VALUES
+('2025-06-01 09:00:00',
+ '2025-06-01 10:00:00',
+ TRUE,
+ 1);
 
-INSERT INTO ordonnance (contenu, rendezVous_id)
-VALUES ('Paracetamol 500mg', 1);
+INSERT INTO rendezvous
+(statut, patient_id, disponibilite_id)
+VALUES
+('confirmé', 1, 1);
+
+INSERT INTO ordonnance
+(contenu, rendezVous_id)
+VALUES
+('Paracetamol 500mg', 1);
