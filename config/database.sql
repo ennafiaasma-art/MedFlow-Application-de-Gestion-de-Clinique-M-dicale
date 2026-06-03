@@ -1,6 +1,5 @@
 CREATE DATABASE medflow;
 
-
 USE medflow;
 
 CREATE TABLE role (
@@ -46,7 +45,7 @@ CREATE TABLE disponibilite (
     id INT AUTO_INCREMENT PRIMARY KEY,
     date_debut DATETIME NOT NULL,
     date_fin DATETIME NOT NULL,
-    disponible BOOLEAN DEFAULT TRUE,
+    disponible BOOLEAN,
     id_medcin INT NOT NULL,
     FOREIGN KEY (id_medcin) REFERENCES doctor(id_doctor)
 );
@@ -98,13 +97,22 @@ VALUES (2, 1);
 INSERT INTO patient (user_id)
 VALUES (3);
 
-INSERT INTO disponibilite
+
+INSERT INTO disponibilite 
 (date_debut, date_fin, disponible, id_medcin)
 VALUES
-('2025-06-01 09:00:00',
- '2025-06-01 10:00:00',
- TRUE,
- 1);
+('2026-06-01 09:00:00', '2026-06-01 10:00:00', TRUE, 1),
+('2026-06-02 09:00:00', '2026-06-02 10:00:00', FALSE, 1),
+('2026-06-03 09:00:00', '2026-06-03 10:00:00', TRUE, 1),
+('2026-06-04 09:00:00', '2026-06-04 10:00:00', FALSE, 1),
+('2026-06-05 09:00:00', '2026-06-05 10:00:00', TRUE, 1);
+ 
+ 
+ 
+ 
+ 
+ 
+
 
 INSERT INTO rendezvous
 (statut, patient_id, disponibilite_id)
