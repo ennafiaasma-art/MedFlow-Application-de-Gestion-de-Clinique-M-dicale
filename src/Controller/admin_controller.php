@@ -2,27 +2,22 @@
 <?php
 require_once __DIR__ . '/../Repository/Admin_Repository.php';
 require_once __DIR__ . '/../../config/database.php';
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 class AdminController 
 {
     private $adminRepository;
-
     public function __construct() 
     {
-        $db = Database::getInstance();
-        
+        $db = Database::getInstance();      
         $this->adminRepository = new admin_repository($db);
     }
 
     public function dashboard() 
     {
-        $tauxAnnulation = $this->adminRepository->getCancelationRate();
-        $medecins = $this->adminRepository->getAllDoctorsWithFinishedAppointments();
-       
+        $tauxAnnulation = $this->adminRepository->createSpeciality();
+        $medecins = $this->adminRepository->getAllDoctors();
     }
     public function addDoctor()
     {

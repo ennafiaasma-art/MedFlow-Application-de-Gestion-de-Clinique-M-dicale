@@ -7,7 +7,7 @@ class admin_repository
     {
         $this->db = $dbConnection;
     }
-    public function getAllDoctorsWithFinishedAppointments() 
+    public function getAllDoctors() 
     {
         $sql = "SELECT m.*, COUNT(r.id) as total_rdv_termines 
                 FROM medecins m 
@@ -30,11 +30,27 @@ class admin_repository
     }
     public function createSpeciality($nom_specialite, $description)
     {
-        $sql = "INSERT INTO specialites (nom, description) VALUES (:nom, :description)";
+        try{
+            $sql = "INSERT INTO specialites (nom, description) VALUES (:nom, :description)";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':nom' => $nom_specialite,
             ':description' => $description
         ]);
+        }catch(PDOException $e){
+            die("auccun createSpeciality" .$e ->getMessage());
+        }
+        
+    }
+
+    public function GetAllspecialite(){
+        try{
+            $querySpec = "SELECT id, nom FROM specialite ORDER BY nom ASC";
+        $stmtSpec = $this->db->prepare($querySpec);
+        $stmtSpec->execute();
+        $specialites = $stmtSpec->fetchAll(PDO::FETCH_ASSOC);
+        }catch(PDOException $e){
+            die('error ' . $e -> getMessage());
+        }
     }
 }

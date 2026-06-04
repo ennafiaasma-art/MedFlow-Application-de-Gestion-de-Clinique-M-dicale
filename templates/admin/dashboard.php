@@ -1,3 +1,10 @@
+<?php 
+require_once __DIR__ . '/../../config/database.php';
+$querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
+    $stmtSpec = $db->prepare($querySpec);
+    $stmtSpec->execute();
+    $specialites = $stmtSpec->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -361,11 +368,16 @@
                                 <i class="fa-solid fa-stethoscope"></i>
                             </span>
                             <select required class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-8 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
-                                <option value="" disabled selected>Sélectionner...</option>
-                                <option value="cardiologie">Cardiologie</option>
-                                <option value="pediatrie">Pédiatrie</option>
-                                <option value="dermatologie">Dermatologie</option>
-                                <option value="dentaire">Dentaire</option>
+                               <option value="">Choisir la spécialité...</option>
+                                        <?php if (!empty($specialites)): ?>
+                                            <?php foreach ($specialites as $spec): ?>
+                                                <option value="<?php echo htmlspecialchars($spec['id']); ?>">
+                                                    <?php echo htmlspecialchars($spec['nom']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <option value="" disabled>Aucune spécialité trouvée</option>
+                                        <?php endif; ?>
                             </select>
                         </div>
                     </div>
