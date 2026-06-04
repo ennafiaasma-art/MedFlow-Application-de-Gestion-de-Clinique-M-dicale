@@ -13,7 +13,45 @@ $stmt = $pdo->prepare("
 $stmt->execute([$id_medcin]);
 $rdv_today = $stmt->fetch()['total'];
 
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) as total
+    FROM rendezvous 
+    JOIN disponibilite ON rendezvous.disponibilite_id = disponibilite.id
+    WHERE disponibilite.id_medcin = ?  AND rendezvous.statut = 'en_attente'
+");
+$stmt->execute([$id_medcin]);
+$en_attente = $stmt->fetch()['total'];
 
+
+$stmt = $pdo->prepare("
+ SELECT COUNT(*) as total
+    FROM rendezvous 
+    JOIN disponibilite ON rendezvous.disponibilite_id = disponibilite.id
+    WHERE disponibilite.id_medcin = ?  AND rendezvous.statut = 'confirme'
+    
+");
+$stmt->execute([$id_medcin]);
+$confirme = $stmt->fetch()['total'];
+
+$stmt = $pdo->prepare("
+ SELECT COUNT(*) as total
+    FROM rendezvous 
+    JOIN disponibilite ON rendezvous.disponibilite_id = disponibilite.id
+    WHERE disponibilite.id_medcin = ?  AND rendezvous.statut = 'annule'
+");
+$stmt->execute([$id_medcin]);
+$annule = $stmt->fetch()['total'];
+
+$stmt = $pdo->prepare("
+ SELECT * FROM rendezvous 
+JOIN patient  ON rendezvous.patient_id = patient.id_patient
+JOIN user  ON patient.user_id = user.id
+JOIN disponibilite  ON rendezvous.disponibilite_id = disponibilite.id
+WHERE disponibilite.id_medcin = ?
+ORDER BY disponibilite.date_debut
+");
+$stmt->execute([$id_medcin]);
+$rdvs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $badges = [
     'en_attente' => ['cls' => 'bg-yellow-100 text-yellow-700', 'label' => 'En attente'],
@@ -54,15 +92,15 @@ $badges = [
         </div>
         <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-400">
             <p class="text-sm text-slate-500 mb-1">En attente</p>
-            <h2 class="text-4xl font-bold text-yellow-500"></h2>
+            <h2 class="text-4xl font-bold text-yellow-500"><?= $en_attente ?></h2>
         </div>
         <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
             <p class="text-sm text-slate-500 mb-1">Confirmés</p>
-            <h2 class="text-4xl font-bold text-green-600"></h2>
+            <h2 class="text-4xl font-bold text-green-600"><?= $confirme ?></h2>
         </div>
         <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-400">
             <p class="text-sm text-slate-500 mb-1">Annulés</p>
-            <h2 class="text-4xl font-bold text-red-500"></h2>
+            <h2 class="text-4xl font-bold text-red-500"><?= $annule ?></h2>
         </div>
     </div>
 
@@ -73,8 +111,8 @@ $badges = [
         <table class="w-full text-sm">
             <thead>
                 <tr class="bg-slate-50 text-slate-500 uppercase text-xs">
-                    <th class="text-left p-3">Depart</th>
-                    <th class="text-left p-3">la Fin</th>
+                    <th class="text-left p-3">Jour</th>
+                    <th class="text-left p-3">Heure</th>
                     <th class="text-left p-3">Patient</th>
                     <th class="text-left p-3">Statut</th>
                     <th class="text-left p-3">Actions</th>
@@ -93,16 +131,22 @@ $badges = [
 
     <td class="p-3"> <?= $rdv['nom'] ?> </td>
 
-    <td  class="p-3">
-    <?php $b = $badges[$rdv['statut']] ?? ['cls' => 'bg-gray-100 text-gray-600',
-     'label' => $rdv['statut']]; ?>
+ 
+    <td class="p-3">
 
-    <span class="px-2 py-1 rounded-full text-sm <?= $b['cls'] ?>">
-        <?= $b['label'] ?>
-    </span>
-</td> </td>
+        <?php if($rdv['statut'] == 'en_attente'){ ?>
 
-<td class="p-3">
+            <a href="valider-rdv.php?id=<?= $rdv['id'] ?>"
+               class="bg-green-500 text-white px-2 py-1 rounded">
+               Valider
+            </a>
+
+            <a href="annuler-rdv.php?id=<?= $rdv['id'] ?>"
+               class="bg-red-500 text-white px-2 py-1 rounded">
+               Annuler
+            </a>
+
+        <?php } ?>
 
         <?php if($rdv['statut'] == 'confirme'){ ?>
 
@@ -115,6 +159,16 @@ $badges = [
 
     </td>
 
+</tr>
+
+<?php } ?>
+
+<?php if(empty($rdvs)){ ?>
+
+<tr>
+    <td colspan="5" class="text-center p-4 text-gray-500">
+        Aucun rendez-vous cette semaine
+    </td>
 </tr>
 
 <?php } ?>
