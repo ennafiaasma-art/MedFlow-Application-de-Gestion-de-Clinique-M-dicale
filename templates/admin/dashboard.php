@@ -1,9 +1,7 @@
 <?php 
-require_once __DIR__ . '/../../config/database.php';
-$querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
-    $stmtSpec = $db->prepare($querySpec);
-    $stmtSpec->execute();
-    $specialites = $stmtSpec->fetchAll(PDO::FETCH_ASSOC);
+$doctorsList = $doctorsList ?? [];
+$specialites = $specialites ?? [];
+$tauxAnnulation = $tauxAnnulation ?? '0%';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -11,9 +9,7 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard & Configuration - MediClinic</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -31,9 +27,7 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
 
     <div class="flex min-h-screen overflow-hidden">
 
-        <!-- ASIDE (Sidebar) -->
         <aside class="fixed inset-y-0 left-0 z-40 w-64 transform bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0">
-            <!-- Logo / Brand -->
             <div class="flex h-20 items-center justify-center border-b border-slate-800 px-6">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500 text-white shadow-lg shadow-teal-500/30">
@@ -43,7 +37,6 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                 </div>
             </div>
 
-            <!-- Navigation Links -->
             <nav class="space-y-1 px-4 py-6">
                 <a href="#" class="flex items-center gap-3 rounded-xl bg-teal-600 px-4 py-3 text-white transition-all">
                     <i class="fa-solid fa-chart-pie w-5 text-center text-lg"></i>
@@ -77,7 +70,6 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                 </a>
             </nav>
 
-            <!-- User Profile Quick View (Bottom) -->
             <div class="absolute bottom-0 left-0 w-full border-t border-slate-800 p-4 bg-slate-950/40">
                 <div class="flex items-center gap-3">
                     <div class="relative h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold border border-slate-600">
@@ -94,12 +86,9 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
         <div class="flex flex-1 flex-col overflow-y-auto h-screen">
             
-            <!-- HEADER -->
             <header class="flex h-20 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 md:px-8">
-                <!-- Mobile Menu Button & Title -->
                 <div class="flex items-center gap-4">
                     <button id="mobile-menu-toggle" class="text-slate-500 hover:text-slate-700 md:hidden">
                         <i class="fa-solid fa-bars text-xl"></i>
@@ -110,14 +99,11 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                     </div>
                 </div>
 
-                <!-- Header Actions -->
                 <div class="flex items-center gap-4">
-                    <!-- Notifications -->
                     <button class="relative rounded-xl border border-slate-200 p-2.5 text-slate-500 hover:bg-slate-50 transition-all">
                         <i class="fa-regular fa-bell text-lg"></i>
                         <span class="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-rose-500"></span>
                     </button>
-                    <!-- Date Badge -->
                     <div class="hidden items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 sm:flex">
                         <i class="fa-regular fa-calendar text-teal-600"></i>
                         <span>Aujourd'hui</span>
@@ -125,13 +111,10 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                 </div>
             </header>
 
-            <!-- MAIN BODY / PANELS -->
             <main class="flex-1 p-6 md:p-8 space-y-8 overflow-y-auto">
 
-                <!-- 1. INDICATORS ROW (KPIs) -->
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     
-                    <!-- KPI: RDV Totaux -->
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-slate-500">Total Rendez-vous</p>
@@ -145,7 +128,6 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                         </div>
                     </div>
 
-                    <!-- KPI: Taux d'annulation (Demandé dans US 3.3) -->
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-slate-500">Taux d'Annulation</p>
@@ -159,7 +141,6 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                         </div>
                     </div>
 
-                    <!-- KPI: Médecins Actifs -->
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-slate-500">Médecins Actifs</p>
@@ -173,7 +154,6 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                         </div>
                     </div>
 
-                    <!-- KPI: Spécialités -->
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-slate-500">Spécialités Disponibles</p>
@@ -188,10 +168,8 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                     </div>
                 </div>
 
-                <!-- 2. CORE FEATURES SECTION -->
                 <div class="grid gap-8 lg:grid-cols-3">
                     
-                    <!-- TABLE: RDV Terminés par Médecin (US 3.3) -->
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
@@ -203,7 +181,7 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                             </button>
                         </div>
 
-                        <!-- Table -->
+                      
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -259,14 +237,14 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                         </div>
                     </div>
 
-                    <!-- QUICK ACTIONS & CONTEXT (US 3.1 & 3.2) -->
+                   
                     <div class="space-y-6">
-                        <!-- Action Card -->
+                       
                         <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                             <h3 class="text-lg font-bold text-slate-900 mb-4">Actions Rapides</h3>
                             
                             <div class="space-y-3">
-                                <!-- Button Ajouter Médecin -->
+                               
                                 <button id="btn-add-doctor" class="flex w-full items-center gap-3 rounded-xl bg-slate-900 p-3.5 text-left text-sm font-semibold text-white shadow-sm hover:bg-slate-850 hover:scale-[1.01] active:scale-[0.99] transition-all duration-250">
                                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-teal-400">
                                         <i class="fa-solid fa-user-plus"></i>
@@ -278,7 +256,7 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                                     <i class="fa-solid fa-chevron-right ml-auto text-slate-500 text-xs"></i>
                                 </button>
 
-                                <!-- Button Gérer les spécialités -->
+                              
                                 <button id="btn-add-specialty" class="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 text-left text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:scale-[1.01] active:scale-[0.99] transition-all duration-250">
                                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-teal-600">
                                         <i class="fa-solid fa-folder-plus"></i>
@@ -292,7 +270,7 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                             </div>
                         </div>
 
-                        <!-- Mini Liste des Spécialités Actives -->
+                        
                         <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-sm font-bold text-slate-900">Spécialités Populaires</h4>
@@ -313,13 +291,11 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
         </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- MODAL 1: ADD DOCTOR (US 3.1)                             -->
-    <!-- ======================================================== -->
+
     <div id="modal-doctor" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md hidden transition-opacity duration-300">
         <div class="relative w-full max-w-lg rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl transform scale-95 transition-transform duration-300 ease-out">
             
-            <!-- Header Modal -->
+           
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
@@ -335,44 +311,55 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                 </button>
             </div>
 
-            <!-- Form -->
-            <form id="form-doctor" class="space-y-4">
+           
+            <form action="../../src/Controller/admin_controller.php" method="POST" id="form-doctor" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <!-- Nom complet -->
+                   
+                
                     <div class="col-span-2">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nom Complet</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                                 <i class="fa-regular fa-user"></i>
                             </span>
-                            <input type="text" required placeholder="Dr. Prénom Nom" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
+                            <input type="text" name="doctor_name" required placeholder="Dr. Prénom Nom" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
                         </div>
                     </div>
 
-                    <!-- Email -->
+                  
+                    
                     <div class="col-span-2">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Adresse E-mail</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                                 <i class="fa-regular fa-envelope"></i>
                             </span>
-                            <input type="email" required placeholder="nom@medirest.com" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
+                            <input type="email" name="email" required placeholder="nom@medirest.com" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
                         </div>
                     </div>
 
-                    <!-- Spécialité (Association Obligatoire) -->
+                   <div class="col-span-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                               <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" name="password" required placeholder="......" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
+                        </div>
+                    </div>
+                    
                     <div class="col-span-2 sm:col-span-1">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Spécialité <span class="text-rose-500">*</span></label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                                 <i class="fa-solid fa-stethoscope"></i>
                             </span>
-                            <select required class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-8 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
+                            <select required name="specialite_id" class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-8 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
                                <option value="">Choisir la spécialité...</option>
                                         <?php if (!empty($specialites)): ?>
                                             <?php foreach ($specialites as $spec): ?>
-                                                <option value="<?php echo htmlspecialchars($spec['id']); ?>">
-                                                    <?php echo htmlspecialchars($spec['nom']); ?>
+                                                <option value="<?php echo htmlspecialchars($spec->id); ?>">
+                                                    <?php echo htmlspecialchars($spec->nom); ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         <?php else: ?>
@@ -382,14 +369,15 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                         </div>
                     </div>
 
-                    <!-- Statut initial -->
+                   
+                    
                     <div class="col-span-2 sm:col-span-1">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Statut Initial</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                                 <i class="fa-solid fa-toggle-on"></i>
                             </span>
-                            <select class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-8 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
+                            <select name="status" class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-8 text-sm outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10">
                                 <option value="actif">Actif d'office</option>
                                 <option value="desactive">Désactivé (Brouillon)</option>
                             </select>
@@ -397,12 +385,11 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                     </div>
                 </div>
 
-                <!-- Footer Modal -->
                 <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-5 mt-6">
                     <button type="button" id="cancel-doctor-modal" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all">
                         Annuler
                     </button>
-                    <button type="submit" class="rounded-xl bg-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 hover:bg-teal-700 hover:shadow-teal-500/30 active:scale-[0.98] transition-all">
+                    <button type="submit" name="add_doctor" class="rounded-xl bg-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 hover:bg-teal-700 hover:shadow-teal-500/30 active:scale-[0.98] transition-all">
                         Créer le Compte
                     </button>
                 </div>
@@ -410,14 +397,10 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
         </div>
     </div>
 
-
-    <!-- ======================================================== -->
-    <!-- MODAL 2: ADD SPECIALTY (US 3.2)                          -->
-    <!-- ======================================================== -->
     <div id="modal-specialty" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md hidden transition-opacity duration-300">
         <div class="relative w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl transform scale-95 transition-transform duration-300 ease-out">
             
-            <!-- Header Modal -->
+           
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
@@ -433,9 +416,9 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                 </button>
             </div>
 
-            <!-- Form -->
+          
             <form action="../../src/Controller/admin_controller.php" method="POST" id="form-specialty" class="space-y-4">
-                <!-- Nom de la Spécialité -->
+            
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nom de la Spécialité</label>
                     <div class="relative">
@@ -446,7 +429,7 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
                     </div>
                 </div>
 
-                <!-- Footer Modal -->
+               
                 <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-5 mt-6">
                     <button type="button" id="cancel-specialty-modal" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all">
                         Annuler
@@ -459,9 +442,7 @@ $querySpec = "SELECT id, nom FROM specialites ORDER BY nom ASC";
         </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- JAVASCRIPT LOGIC                                         -->
-    <!-- ======================================================== -->
+   
     <script>
         // DOM Elements
         const addDoctorBtn = document.getElementById('btn-add-doctor');

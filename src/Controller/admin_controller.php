@@ -1,102 +1,112 @@
-
 <?php
-require_once __DIR__ . '/../Repository/Admin_Repository.php';
+
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../Repository/admin_repository.php';
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-class AdminController 
-{
-    private $adminRepository;
-    public function __construct() 
-    {
-        $db = Database::getInstance();      
-        $this->adminRepository = new admin_repository($db);
-    }
 
-    public function dashboard() 
-    {
-        $tauxAnnulation = $this->adminRepository->createSpeciality();
-        $medecins = $this->adminRepository->getAllDoctors();
-    }
-    public function addDoctor()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nom = isset($_POST['nom']) ? trim(htmlspecialchars($_POST['nom'])) : '';
-            $email = isset($_POST['email']) ? trim(htmlspecialchars($_POST['email'])) : '';
-            $specialite_id = isset($_POST['specialite_id']) ? intval($_POST['specialite_id']) : 0;
-            $statut = isset($_POST['statut']) ? trim(htmlspecialchars($_POST['statut'])) : 'actif';
+$dbConnection = Database::getInstance();
+$repository = new admin_repository($dbConnection);
 
-            $errors = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            if (empty($nom)) {
-                $errors['nom'] ="le mon de doctore est obligaloire.";
-            }
+    if (isset($_POST['action']) && $_POST['action'] === 'update_doctor') {
+        
+        $doctor_id     = (int)($_POST['doctor_id'] ?? 0);
+        $doctor_name   = trim($_POST['doctor_name'] ?? '');
+        $specialite_id = (int)($_POST['specialite_id'] ?? 0);
+        $doctor_status = trim($_POST['doctor_status'] ?? 'actif');
 
-            if (empty($email)) {
-                $errors['email'] ="email de doctore est obligaloire.";
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors['email'] = "email incorrect !";
-            }
+        if ($doctor_id > 0 && !empty($doctor_name) && $specialite_id > 0) {
+            
+            $isUpdated = $repository->updateDoctor($doctor_id, $doctor_name, $specialite_id, $doctor_status);
 
-            if ($specialite_id <= 0) {
-                $errors['specialite'] = "spécialité est obligatoire !";
-            }
-
-            if (!empty($errors)) {
-                $_SESSION['errors'] = $errors;
-                $_SESSION['old_inputs'] = $_POST; 
-                header('Location: /admin/dashboard?modal=add-doctor');
-                exit();
-            }
-
-            $success = $this->adminRepository->createDoctor($nom, $email, $specialite_id, $statut);
-
-            if ($success) {
-            $_SESSION['success_message'] = "ajouter médcin avec succeé";
+            if ($isUpdated) {
+                $_SESSION['success_message'] = "Le profil du médecin (Dr. " . htmlspecialchars($doctor_name) . ") a été modifié avec succès !";
             } else {
-                $_SESSION['error_message'] = "error !";
+                $_SESSION['error_message'] = "Une erreur est survenue lors de la modification.";
             }
-
-            header('Location: /admin/dashboard');
-            exit();
+            
+        } else {
+            $_SESSION['error_message'] = "Veuillez vérifier les informations. Tous les champs sont obligatoires.";
         }
+
+        header('Location: ../../templates/admin/dashboard.php');
+        exit();
     }
 
-    public function addSpeciality()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nom_specialite = isset($_POST['nom_specialite']) ? trim(htmlspecialchars($_POST['nom_specialite'])) : '';
-            $description = isset($_POST['description']) ? trim(htmlspecialchars($_POST['description'])) : '';
+    if (isset($_POST['action']) && $_POST['action'] === 'delete_specialite') {
+        
+        $specialite_name = trim($_POST['specialite_name'] ?? '');
 
-            $errors = [];
+        if (!empty($specialite_name)) {
+            
+            $isDeleted = $repository->deleteSpécialité($specialite_name);
 
-            if (empty($nom_specialite)) {
-                $errors['nom_specialite'] = "le mon de doctore est obligaloire";
-            }
-
-            if (!empty($errors)) {
-                $_SESSION['errors'] = $errors;
-                $_SESSION['old_inputs'] = $_POST;
-                header('Location: /admin/dashboard?modal=add-speciality');
-                exit();
-            }
-
-            $success = $this->adminRepository->createSpeciality($nom_specialite, $description);
-
-            if ($success) {
-                $_SESSION['success_message'] = "success";
+            if ($isDeleted) {
+                $_SESSION['success_message'] = "La spécialité a été supprimée avec succès !";
             } else {
-                $_SESSION['error_message'] = "error";
+                $_SESSION['error_message'] = "Impossible de supprimer la spécialité (liée à des médecins).";
             }
-
-            header('Location: /admin/dashboard');
-            exit();
+        } else {
+            $_SESSION['error_message'] = "Nom de spécialité invalide.";
         }
+
+        header('Location: ../../templates/admin/dashboard.php');
+        exit();
     }
+
+    if (isset($_POST['doctor_name']) && !isset($_POST['action'])) { 
+        
+        $doctor_name     = trim($_POST['doctor_name'] ?? '');
+        $doctor_email    = trim($_POST['email'] ?? '');
+        $doctor_password = $_POST['password'] ?? '';
+        $specialite_id   = isset($_POST['specialite_id']) ? (int)$_POST['specialite_id'] : 0;
+        $statut          = trim($_POST['status'] ?? 'actif'); // جلب الحالة من الفورم
+
+        if (!empty($doctor_name) && !empty($doctor_email) && !empty($doctor_password) && $specialite_id > 0) {
+            
+            $result = $repository->createDoctor($doctor_name, $doctor_email, $doctor_password, $specialite_id, $statut);
+
+            if ($result) {
+                $_SESSION['success_message'] = "Le compte du Dr. " . htmlspecialchars($doctor_name) . " a été créé avec succès !";
+            } else {
+                $_SESSION['error_message'] = "Erreur de création. L'adresse email est peut-être déjà utilisée.";
+            }
+        } else {
+            $_SESSION['error_message'] = "Veuillez remplir tous les champs obligatoires (*) !";
+        }
+
+        header('Location: ../../templates/admin/dashboard.php');
+        exit();
+    }
+
+    if (isset($_POST['add_specialite'])) {
+        $name_specialite = htmlspecialchars(trim($_POST['specialite_name'] ?? ''));
+
+        if (empty($name_specialite)) {
+            $_SESSION['error_message'] = "Le nom de la spécialité ne peut pas être vide.";
+            header('Location: ../../templates/admin/dashboard.php');
+            exit(); 
+        }
+        
+        $succ = $repository->creatSpécialité($name_specialite);
+
+        if ($succ) {
+            $_SESSION['success_message'] = "La spécialité a été ajoutée avec succès !";
+        } else {
+            $_SESSION['error_message'] = "Erreur lors de l'enregistrement de la spécialité.";
+        }
+        header('Location: ../../templates/admin/dashboard.php');
+        exit();
+    }
+
+$specialites = $adminRepository->getSpecialities();
+
+require_once "../../views/admin/dashboard.php";
 }
 
-
-
-
-
+header('Location: ../../templates/admin/dashboard.php');
+exit();
