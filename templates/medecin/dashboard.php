@@ -131,7 +131,12 @@ $badges = [
 
     <td class="p-3"> <?= $rdv['nom'] ?> </td>
 
- 
+  <td class="p-3">
+    <span class="<?= $badges[$rdv['statut']]['cls'] ?>">
+        <?= $badges[$rdv['statut']]['label'] ?>
+    </span>
+</td>
+
     <td class="p-3">
 
         <?php if($rdv['statut'] == 'en_attente'){ ?>
