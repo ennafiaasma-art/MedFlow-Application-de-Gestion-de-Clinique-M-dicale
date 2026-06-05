@@ -4,6 +4,7 @@ require '../../config/database.php';
 
 $patientId = 1;
 
+
 $sql = "
 SELECT COUNT(*) AS total
 FROM rendezvous
