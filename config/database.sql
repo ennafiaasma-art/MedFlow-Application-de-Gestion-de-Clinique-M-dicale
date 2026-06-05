@@ -1,6 +1,8 @@
 CREATE DATABASE medflow;
 USE medflow;
 
+
+
 -- =========================
 -- TABLE ROLE
 -- =========================
@@ -155,7 +157,7 @@ INSERT INTO rendezvous (statut, dateCreation, patient_id, disponibilite_id) VALU
 ('confirme', '2026-06-01 09:15:00', 1, 2),
 ('annule', '2026-06-01 10:00:00', 2, 3),
 ('en_attente', '2026-06-02 11:20:00', 2, 4),
-('confirme', '2026-06-02 14:45:00', 3, 5),
+('en_attente', '2026-06-02 14:45:00', 3, 5),
 ('en_attente', '2026-06-03 09:00:00', 1, 6),
 ('confirme', '2026-06-03 09:30:00', 2, 7);
 
