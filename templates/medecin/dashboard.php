@@ -48,12 +48,12 @@ JOIN patient  ON rendezvous.patient_id = patient.id_patient
 JOIN user  ON patient.user_id = user.id
 JOIN disponibilite  ON rendezvous.disponibilite_id = disponibilite.id
 WHERE disponibilite.id_medcin = ?
-ORDER BY disponibilite.date_debut
+
 ");
 $stmt->execute([$id_medcin]);
-$rdvs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$rdv = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$badges = [
+$arr = [
     'en_attente' => ['cls' => 'bg-yellow-100 text-yellow-700', 'label' => 'En attente'],
     'confirme'   => ['cls' => 'bg-green-100 text-green-700',  'label' => 'Confirmé'],
     'annule'     => ['cls' => 'bg-red-100 text-red-600',      'label' => 'Annulé'],
@@ -111,8 +111,8 @@ $badges = [
         <table class="w-full text-sm">
             <thead>
                 <tr class="bg-slate-50 text-slate-500 uppercase text-xs">
-                    <th class="text-left p-3">Jour</th>
-                    <th class="text-left p-3">Heure</th>
+                    <th class="text-left p-3">depart </th>
+                    <th class="text-left p-3">fin</th>
                     <th class="text-left p-3">Patient</th>
                     <th class="text-left p-3">Statut</th>
                     <th class="text-left p-3">Actions</th>
@@ -121,41 +121,30 @@ $badges = [
 
   <tbody>
 
-<?php foreach($rdvs as $rdv){ ?>
+<?php foreach($rdv as $elemnt){ ?>
 
 <tr class="border-b">
     
-    <td class="p-3"><?= $rdv['date_debut'] ?></td>
+    <td class="p-3"><?= $elemnt['date_debut'] ?></td>
 
-    <td class="p-3"> <?= $rdv['date_fin'] ?></td>
+    <td class="p-3"> <?= $elemnt['date_fin'] ?></td>
 
-    <td class="p-3"> <?= $rdv['nom'] ?> </td>
+    <td class="p-3"> <?= $elemnt['nom'] ?> </td>
 
   <td class="p-3">
-    <span class="<?= $badges[$rdv['statut']]['cls'] ?>">
-        <?= $badges[$rdv['statut']]['label'] ?>
+    <span class="<?= $arr[$elemnt['statut']]['cls'] ?>"> 
+                 <?= $arr[$elemnt['statut']]['label'] ?>
     </span>
-</td>
+ </td>
 
     <td class="p-3">
 
-        <?php if($rdv['statut'] == 'en_attente'){ ?>
 
-            <a href="valider-rdv.php?id=<?= $rdv['id'] ?>"
-               class="bg-green-500 text-white px-2 py-1 rounded">
-               Valider
-            </a>
 
-            <a href="annuler-rdv.php?id=<?= $rdv['id'] ?>"
-               class="bg-red-500 text-white px-2 py-1 rounded">
-               Annuler
-            </a>
 
-        <?php } ?>
+        <?php if($elemnt['statut'] == 'confirme'){ ?>
 
-        <?php if($rdv['statut'] == 'confirme'){ ?>
-
-            <a href="ordonnance.php?id=<?= $rdv['id'] ?>"
+            <a href="ordonnance.php?id=<?= $elemnt['id'] ?>"
                class="bg-blue-500 text-white px-2 py-1 rounded">
                Ordonnance
             </a>
@@ -163,20 +152,7 @@ $badges = [
         <?php } ?>
 
     </td>
-
 </tr>
-
 <?php } ?>
-
-<?php if(empty($rdvs)){ ?>
-
-<tr>
-    <td colspan="5" class="text-center p-4 text-gray-500">
-        Aucun rendez-vous cette semaine
-    </td>
-</tr>
-
-<?php } ?>
-
 </tbody>
 </html>
