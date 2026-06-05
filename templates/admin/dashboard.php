@@ -1,7 +1,24 @@
+
 <?php 
-$doctorsList = $doctorsList ?? [];
-$specialites = $specialites ?? [];
-$tauxAnnulation = $tauxAnnulation ?? '0%';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once '../../config/database.php';
+require_once '../../src/Repository/admin_repository.php';
+
+$dbConnection = Database::getInstance();
+$repository = new AdminRepository($dbConnection);
+
+$specialites = $repository->getSpecialities();
+$doctorsList = $repository->getAllDoctors();
+
+
+$totalAppointments = $repository->countAppointments();
+$tauxAnnulation = $repository->getCancelationRate();
+$activeDoctors = $repository->countDoctors();
+$totalPatients = $repository->countPatients(); // ila khtajitih
+$totaleSpecialities= $repository->getAllSpecialities();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -118,9 +135,8 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-slate-500">Total Rendez-vous</p>
-                            <h3 class="mt-2 text-3xl font-bold text-slate-900">1,248</h3>
-                            <span class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
-                                <i class="fa-solid fa-arrow-up"></i> +12% ce mois
+                        <h3 class="mt-2 text-3xl font-bold text-slate-900"><?= $totalAppointments ?></h3>                            <span class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                                
                             </span>
                         </div>
                         <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -131,9 +147,8 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-slate-500">Taux d'Annulation</p>
-                            <h3 class="mt-2 text-3xl font-bold text-slate-900">4.2%</h3>
-                            <span class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
-                                <i class="fa-solid fa-arrow-down"></i> -0.8% vs dérnier mois
+                        <h3 class="mt-2 text-3xl font-bold text-slate-900"><?= $tauxAnnulation ?>%</h3>                            <span class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                                
                             </span>
                         </div>
                         <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
@@ -143,8 +158,7 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
 
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-slate-500">Médecins Actifs</p>
-                            <h3 class="mt-2 text-3xl font-bold text-slate-900">24</h3>
+                        <h3 class="mt-2 text-3xl font-bold text-slate-900"><?= $activeDoctors ?></h3>                   
                             <span class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-slate-400">
                                 <i class="fa-solid fa-circle text-[8px] text-emerald-500"></i> Tous opérationnels
                             </span>
@@ -157,7 +171,7 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
                     <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-slate-500">Spécialités Disponibles</p>
-                            <h3 class="mt-2 text-3xl font-bold text-slate-900">12</h3>
+                           <h3 class="mt-2 text-3xl font-bold text-slate-900"><?= count($specialites) ?></h3>
                             <span class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-slate-500">
                                 Filtrage actif patient
                             </span>
@@ -181,61 +195,134 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
                             </button>
                         </div>
 
-                      
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                        <th class="pb-3">Médecin</th>
-                                        <th class="pb-3">Spécialité</th>
-                                        <th class="pb-3 text-center">RDV Terminés</th>
-                                        <th class="pb-3 text-right">Statut</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 text-sm">
-                                    <tr>
-                                        <td class="py-3.5 font-medium text-slate-900 flex items-center gap-3">
-                                            <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-teal-600">AH</div>
-                                            Dr. Amine Hakimi
-                                        </td>
-                                        <td class="py-3.5 text-slate-500">Cardiologie</td>
-                                        <td class="py-3.5 text-center font-semibold text-slate-700">142</td>
-                                        <td class="py-3.5 text-right">
-                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Actif
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3.5 font-medium text-slate-900 flex items-center gap-3">
-                                            <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-teal-600">SB</div>
-                                            Dr. Sarah Benani
-                                        </td>
-                                        <td class="py-3.5 text-slate-500">Pédiatrie</td>
-                                        <td class="py-3.5 text-center font-semibold text-slate-700">128</td>
-                                        <td class="py-3.5 text-right">
-                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Actif
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3.5 font-medium text-slate-900 flex items-center gap-3">
-                                            <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-teal-600">YJ</div>
-                                            Dr. Youssef Jabri
-                                        </td>
-                                        <td class="py-3.5 text-slate-500">Dermatologie</td>
-                                        <td class="py-3.5 text-center font-semibold text-slate-700">94</td>
-                                        <td class="py-3.5 text-right">
-                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> En Congé
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+
+                   <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th class="pb-3">Nom</th>
+                <th class="pb-3">Email</th>
+                <th class="pb-3">Spécialité</th>
+                <th class="pb-3">Statut</th>
+                <th class="pb-3 text-center">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100 text-sm">
+
+        <?php if(!empty($doctorsList)): ?>
+
+            <?php foreach($doctorsList as $doctor): ?>
+
+                <tr>
+
+                    <td class="py-3 font-medium">
+                        <?= htmlspecialchars($doctor['nom']) ?>
+                    </td>
+
+                    <td class="py-3">
+                        <?= htmlspecialchars($doctor['email']) ?>
+                    </td>
+
+                    <td class="py-3">
+                        <?= htmlspecialchars($doctor['specialite_nom']) ?>
+                    </td>
+
+                    <td class="py-3">
+
+                        <?php if($doctor['status'] === 'actif'): ?>
+
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
+                                Actif
+                            </span>
+
+                        <?php else: ?>
+
+                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
+                                Désactivé
+                            </span>
+
+                        <?php endif; ?>
+
+                    </td>
+
+                    <td class="py-3">
+                        <div class="flex justify-center gap-2">
+
+                            <!-- Changer statut -->
+                            <form action="../../src/Controller/admin_controller.php" method="POST">
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="change_status">
+
+                                <input type="hidden"
+                                       name="doctor_id"
+                                       value="<?= $doctor['id_doctor'] ?>">
+
+                                <input type="hidden"
+                                       name="status"
+                                       value="<?= $doctor['status'] === 'actif' ? 'desactive' : 'actif' ?>">
+
+                                <button
+                                    type="submit"
+                                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+
+                                    <?= $doctor['status'] === 'actif'
+                                        ? 'Désactiver'
+                                        : 'Activer' ?>
+
+                                </button>
+
+                            </form>
+
+                            <!-- Supprimer -->
+                            <form action="../../src/Controller/admin_controller.php"
+                                  method="POST"
+                                  onsubmit="return confirm('Supprimer ce médecin ?')">
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="delete_doctor">
+
+                                <input type="hidden"
+                                       name="user_id"
+                                       value="<?= $doctor['user_id'] ?>">
+
+                                <button
+                                    type="submit"
+                                    class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+
+                                    Supprimer
+
+                                </button>
+
+                            </form>
+
                         </div>
-                    </div>
+                    </td>
+
+                </tr>
+
+            <?php endforeach; ?>
+
+        <?php else: ?>
+
+            <tr>
+                <td colspan="5" class="py-5 text-center text-gray-500">
+                    Aucun médecin trouvé
+                </td>
+            </tr>
+
+        <?php endif; ?>
+
+        </tbody>
+    </table>
+</div>
+</div>
+                            
+                      
 
                    
                     <div class="space-y-6">
@@ -313,6 +400,7 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
 
            
             <form action="../../src/Controller/admin_controller.php" method="POST" id="form-doctor" class="space-y-4">
+                <input type="hidden" name="action" value="add_doctor">
                 <div class="grid grid-cols-2 gap-4">
                    
                 
@@ -358,8 +446,8 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
                                <option value="">Choisir la spécialité...</option>
                                         <?php if (!empty($specialites)): ?>
                                             <?php foreach ($specialites as $spec): ?>
-                                                <option value="<?php echo htmlspecialchars($spec->id); ?>">
-                                                    <?php echo htmlspecialchars($spec->nom); ?>
+                                                <option value="<?php echo htmlspecialchars($spec["id"]); ?>">
+                                                    <?php echo htmlspecialchars($spec ["nom"]); ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         <?php else: ?>
@@ -434,7 +522,7 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
                     <button type="button" id="cancel-specialty-modal" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all">
                         Annuler
                     </button>
-                    <button name="add_spécialité" type="submit" class="rounded-xl bg-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 hover:bg-teal-700 hover:shadow-teal-500/30 active:scale-[0.98] transition-all">
+                    <button name="add_specialite" type="submit" class="rounded-xl bg-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 hover:bg-teal-700 hover:shadow-teal-500/30 active:scale-[0.98] transition-all">
                         Ajouter
                     </button>
                 </div>
@@ -493,17 +581,9 @@ $tauxAnnulation = $tauxAnnulation ?? '0%';
             if (e.target === modalSpecialty) closeModal(modalSpecialty);
         });
 
-        document.getElementById('form-doctor').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Médecin créé avec succès (US 3.1) !');
-            closeModal(modalDoctor);
-        });
+      
 
-        document.getElementById('form-specialty').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Spécialité ajoutée avec succès (US 3.2) !');
-            closeModal(modalSpecialty);
-        });
+       
     </script>
 </body>
 </html>
