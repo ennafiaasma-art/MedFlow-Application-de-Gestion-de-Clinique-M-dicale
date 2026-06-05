@@ -49,10 +49,6 @@ foreach($rdvs as $r){
         <?php if($detail): ?>
           <div class="space-y-2">
 
-
-
-          
-
     <p class="flex justify-between border-b pb-2">
         <span class="font-semibold text-gray-700">Nom :</span>
         <span><?= $detail['nom'] ?></span>
