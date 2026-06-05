@@ -16,12 +16,15 @@ $stmt->execute([$doctorId]);
 
 $creneaux = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$message = "";
+
 if (isset($_POST['reserver'])) {
 
     $patientId = 1; // temporaire
 
     $disponibiliteId = $_POST['disponibilite'];
 
+    // Insertion rendez-vous
     $sql = "
     INSERT INTO rendezvous
     (
@@ -44,60 +47,93 @@ if (isset($_POST['reserver'])) {
         $disponibiliteId
     ]);
 
-    echo "<p>Rendez-vous réservé avec succès.</p>";
+    // Créneau devient indisponible
+    $sql = "
+    UPDATE disponibilite
+    SET disponible = 0
+    WHERE id = ?
+    ";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        $disponibiliteId
+    ]);
+
+    $message = "Rendez-vous réservé avec succès.";
 }
+
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <title>Réservation</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
 
-<div class="max-w-xl mx-auto mt-16">
+<div class="w-full max-w-xl">
 
-<div class="bg-white p-8 rounded-xl shadow-lg">
+    <div class="bg-white p-8 rounded-xl shadow-lg">
 
-<h1 class="text-3xl font-bold text-center text-green-600 mb-6">
-Réserver un rendez-vous
-</h1>
+        <h1 class="text-3xl font-bold text-center text-green-600 mb-6">
+            Réserver un rendez-vous
+        </h1>
 
-<form method="POST">
+        <?php if($message): ?>
 
-<label class="block mb-2 font-semibold">
-Choisir un créneau
-</label>
+            <div class="bg-green-100 text-green-700 p-3 rounded-lg mb-4">
+                <?= $message ?>
+            </div>
 
-<select
-name="disponibilite"
-class="w-full border p-3 rounded-lg mb-6">
+        <?php endif; ?>
 
-<?php foreach($creneaux as $c): ?>
+        <?php if(count($creneaux) > 0): ?>
 
-<option value="<?= $c['id']; ?>">
-<?= $c['date_debut']; ?>
-</option>
+            <form method="POST">
 
-<?php endforeach; ?>
+                <label class="block mb-2 font-semibold">
+                    Choisir un créneau
+                </label>
 
-</select>
+                <select
+                    name="disponibilite"
+                    class="w-full border p-3 rounded-lg mb-6"
+                    required>
 
-<button
-type="submit"
-name="reserver"
-class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600">
+                    <?php foreach($creneaux as $c): ?>
 
-Confirmer la réservation
+                        <option value="<?= $c['id']; ?>">
+                            <?= $c['date_debut']; ?> → <?= $c['date_fin']; ?>
+                        </option>
 
-</button>
+                    <?php endforeach; ?>
 
-</form>
+                </select>
 
-</div>
+                <button
+                    type="submit"
+                    name="reserver"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg">
+
+                    Confirmer la réservation
+
+                </button>
+
+            </form>
+
+        <?php else: ?>
+
+            <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                Aucun créneau disponible pour ce médecin.
+            </div>
+
+        <?php endif; ?>
+
+    </div>
 
 </div>
 

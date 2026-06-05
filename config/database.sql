@@ -69,9 +69,6 @@ CREATE TABLE ordonnance (
     FOREIGN KEY (rendezVous_id) REFERENCES rendezvous(id)
 );
 
-
-
-
 INSERT INTO role (nom_role)
 VALUES
 ('Admin'),
